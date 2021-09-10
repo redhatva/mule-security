@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="sf_GetHierarchy" doc:id="69e9f6ad-3ffb-460d-a282-e6844ba309d9" >
+		<http:request method="GET" doc:name="Get Hierarchy" doc:id="9e5fd961-ceb1-48f7-9499-83cf155c3825" config-ref="Anypoint_HTTP_Request_configuration" path="/accounts/api/organizations/{orgId}/hierarchy">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ vars.accessToken
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"orgId" : p('anypoint.master_org')
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Logger" doc:id="995837ee-7434-416a-bd94-d133008750de" message="#[payload]" />
+		<ee:transform doc:name="Transform Message" doc:id="519704fd-81ca-4ab8-b3a1-b773e040095d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload.subOrganizations map {
+    id: $.id,
+    name: $.name
+} ++  [
+    {
+        id: payload.id,
+        name: payload.name
+    }
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="20f1e06a-1e91-49b5-87c5-5205f45a9325" />
+	</sub-flow>
+	<sub-flow name="sf_GetEnvironments" doc:id="fce68ced-da36-44e3-9948-8a1d7cc4fea6" >
+		<http:request method="GET" doc:name="Request" doc:id="4fa70cca-e5c6-4522-9396-870855e48cd2" path="/accounts/api/cs/organizations/{orgId}/environments" config-ref="Anypoint_HTTP_Request_configuration">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ vars.accessToken
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"orgId" : payload.id
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="b890c45d-0910-49f3-9802-0fb0e268bbc9" message="#[payload]"/>
+	</sub-flow>
+</mule>

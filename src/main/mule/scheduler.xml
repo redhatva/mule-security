@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="main" doc:id="b1b0f650-96e8-48b4-bc06-8f254e7e2fae" >
+		<scheduler doc:name="Scheduler" doc:id="cab1c4e4-6517-4b93-baa4-4a1c7e83d40a" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="60" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="Get Token" doc:id="c602a681-d8c0-4e14-9c84-ce723ad8fe71" name="sf_GetToken" target="accessToken"/>
+		<flow-ref doc:name="Get Hierarchy" doc:id="1ab3e4eb-3d22-4ad5-a36f-6e6f5cf26f15" name="sf_GetHierarchy" target="orgTree"/>
+		<parallel-foreach doc:name="For Each Business Group" doc:id="a2369c01-0186-49bb-a915-43320b621a1b" collection="vars.orgTree">
+			<flow-ref doc:name="Loop Thru Bus Grps" doc:id="188d51a6-a016-48bb-b0c8-567d1d3e1206" name="sf_LoopOrgs"/>
+		</parallel-foreach>
+	</flow>
+	<sub-flow name="sf_LoopOrgs" doc:id="27f7d669-5347-4fe3-bbe2-4938a61d3f9b" >
+		<logger level="INFO" doc:name="Logger" doc:id="17c35612-10c4-4ed4-9c89-fad4ad988c79" message="#['Org: ' ++ payload.name]"/>
+		<flow-ref doc:name="Get Environment" doc:id="363b1f40-4f18-4a7e-b098-a859f341ce70" name="sf_GetEnvironments" target="envTree"/>
+		<parallel-foreach doc:name="For Each Environment" doc:id="9b4ca0ca-9495-4e56-8a21-254031a629e5" collection="vars.envTree.data">
+			<flow-ref doc:name="Get CH Apps" doc:id="fd2cf336-a67b-44c2-9df6-e6377228af54" name="sf_GetApplications"/>
+		</parallel-foreach>
+	</sub-flow>
+</mule>

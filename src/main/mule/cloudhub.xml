@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="sf_GetApplications" doc:id="111990ef-53a9-43d4-846b-b18b3357b8c0" >
+		<http:request method="GET" doc:name="Get Apps" doc:id="d872b3a4-215b-4c3d-947f-15cdde2bb07a" config-ref="Anypoint_HTTP_Request_configuration" path="/cloudhub/api/v2/applications">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"X-ANYPNT-ENV-ID" : payload.id,
+	"Authorization" : "Bearer " ++ vars.accessToken
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="05ce554c-bd76-40fd-9f70-976c40b39862" message="#[payload]"/>
+	</sub-flow>
+</mule>

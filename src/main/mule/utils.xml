@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="sf_GetToken" doc:id="50111d62-e3d9-4382-9a13-8af5e3edbae8" >
+		<ee:transform doc:name="Transform Message" doc:id="a1167cc8-1452-4786-80aa-84682cd32991" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/x-www-form-urlencoded
+---
+{
+	"client_id": p('anypoint.client_id'),
+	"client_secret": p('anypoint.client_secret'),
+	"grant_type": "client_credentials"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Get Token" doc:id="e0366877-60f1-43ae-9e9a-4c39bd511f07" config-ref="Anypoint_HTTP_Request_configuration" path="/accounts/api/v2/oauth2/token"/>
+		<ee:transform doc:name="Transform Message" doc:id="8fa2f617-f162-41ec-bad4-0bb7dcff1c18" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload.access_token]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="Logger" doc:id="f28368db-363b-485c-ab29-10f67c0b8fed" message="#['Access Token = ' ++ payload]"/>
+	</sub-flow>
+</mule>
